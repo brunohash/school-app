@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class UsuarioDAO {
     private Connection conn;
@@ -18,16 +19,15 @@ public class UsuarioDAO {
 
         try {
             cmdSql = conn.prepareStatement("INSERT INTO TBL_USU " +
-                    "(ID_USU, NM_USU, DOC_USU, DT_NSC_USU, EMI_USU, SEN_USU) " +
+                    "(NM_USU, DOC_USU, DT_NSC_USU, EMI_USU, SEN_USU) " +
                     "VALUES " +
-                    "(?, ?, ?, TO_DATE(?,'YYYY-MM-DD'), ?, ?)");
+                    "(?, ?, TO_DATE(?,'YYYY-MM-DD'), ?, ?)");
 
-            cmdSql.setInt(1, usu.getId());
-            cmdSql.setString(2, usu.getNome());
-            cmdSql.setString(3, usu.getDocumento());
-            cmdSql.setString(4, usu.getDataNascimento());
-            cmdSql.setString(5, usu.getEmail());
-            cmdSql.setString(6, usu.getSenha());
+            cmdSql.setString(1, usu.getNome());
+            cmdSql.setString(2, usu.getDocumento());
+            cmdSql.setString(3, usu.getDataNascimento());
+            cmdSql.setString(4, usu.getEmail());
+            cmdSql.setString(5, usu.getSenha());
             cmdSql.executeUpdate();
 
             conn.close();
@@ -176,4 +176,37 @@ public class UsuarioDAO {
 
         return usu;
     }
+
+    public List<Usuario> listarTodosUsuarios() throws SQLException {
+        List<Usuario> listaUsuarios = new ArrayList<>();
+
+        conn = ConnectionFactory.getConnection();
+        PreparedStatement cmdSql = null;
+
+        try {
+            cmdSql = conn.prepareStatement("SELECT id_usu, nm_usu, doc_usu, dt_nsc_usu, emi_usu FROM tbl_usu");
+
+            ResultSet dados = cmdSql.executeQuery();
+
+            while (dados.next()) {
+                Usuario usu = new Usuario();
+
+                usu.setId(dados.getInt(1));
+                usu.setNome(dados.getString(2));
+                usu.setDocumento(dados.getString(3));
+                usu.setDataNascimento(dados.getString(4));
+                usu.setEmail(dados.getString(5));
+
+                listaUsuarios.add(usu);
+            }
+
+            conn.close();
+            cmdSql.close();
+        } catch (SQLException err) {
+            err.printStackTrace();
+        }
+
+        return listaUsuarios;
+    }
+
 }
